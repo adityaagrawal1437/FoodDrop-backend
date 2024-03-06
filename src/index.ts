@@ -4,7 +4,9 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import UserRoute from "./Routes/UserRoutes";
 import RestaurantRoute from "./Routes/RestaurantRoutes";
+
 import SearchRestaurantRoute from "./Routes/SearchRestaurantRoutes";
+import OrderRoute from "./Routes/OrderRoutes";
 import { v2 as cloudinary } from "cloudinary";
 mongoose.connect(process.env.DATABASE as string).then(() => {
   console.log("Connected to database!");
@@ -15,9 +17,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 const app = express();
-app.use(express.json());
+
 app.use(cors());
 
+app.use("/api/order/checkout/webhook", express.raw({ type: "*/*" }));
+
+app.use(express.json());
 app.get("/health", async (req: Request, res: Response) => {
   res.send({ message: "health OK!" });
 });
@@ -25,6 +30,7 @@ app.get("/health", async (req: Request, res: Response) => {
 app.use("/api/my/user", UserRoute);
 app.use("/api/my/restaurant", RestaurantRoute);
 app.use("/api/restaurant", SearchRestaurantRoute);
+app.use("/api/order", OrderRoute);
 app.listen(7001, () => {
   console.log(`Server is running on port 7001`);
 });
